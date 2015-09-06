@@ -1,6 +1,6 @@
+# coding : utf-8
 import json
 import requests
-import random
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
@@ -41,8 +41,8 @@ def create_user_preferences(request, fb_id):
 
     user, created = FBUser.objects.get_or_create(fb_id=fb_id)
 
-    if created and content:
-        text = get_keywords_text(content['fb_content'].encode('ascii', 'ignore'))
+    if content:
+        text = get_keywords_text(u"Apresentadora tambem faz um passeio com o Sacerdote em um carro antigo. Veja fotos!")
         keywords, relevancies = parse_keywords_and_relevancies(text)
         keyword_map = {}
         map(lambda (k, r): keyword_map.update({k: r}), zip(keywords, relevancies))

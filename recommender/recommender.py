@@ -83,7 +83,7 @@ class Recommender:
 
         has_index = user_id in user_visited_content
 
-        if not has_index:
+        if not has_index or content_id is None:
             user_visited_content[user_id] = []
 
             if content_id is not None:

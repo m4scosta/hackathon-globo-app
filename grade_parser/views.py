@@ -59,10 +59,10 @@ def fetch_api(request):
     slots = _get_slots_from_globo_api(api_url)
 
     for slot in slots:
-        program, created = Program.objects.get_or_create(key=slot["id_programa"])
+        program, created = Program.objects.get_or_create(key=slot["id"])
 
         if not created:
-            print "program %d passed" % slot["id_programa"]
+            print "program %d passed" % slot["id"]
             continue
 
         keywords_text = get_keywords_text_of_slot(slot, post_url)
