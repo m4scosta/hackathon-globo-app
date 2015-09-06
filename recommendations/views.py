@@ -49,10 +49,12 @@ def create_user_preferences(request, fb_id):
             map(lambda (k, r): keyword_map.update({k: r}), zip(keywords, relevancies))
             print keyword_map, content
             Recommender().update_user_preference_vector(fb_id, keyword_map)
+            return HttpResponse(content=json.dumps(keyword_map), content_type="application/json")
     except Exception as e:
         print e
 
     return HttpResponse(content=json.dumps({"status": "OK"}), content_type="application/json")
+
 
 
 def recommend(request, fb_id):
@@ -68,7 +70,7 @@ def like(request, fb_id, content_id):
     map(lambda (k, r): keyword_map.update({k: r}), program.keyword_set.values_list('text', 'relevancy'))
     Recommender().update_user_preference_vector(fb_id, keyword_map, content_id=content_id)
 
-    return HttpResponse(status=200)
+    return HttpResponse(status=200, content=json.dumps(keyword_map), content_type="application/json")
 
 
 def unlike(request, fb_id, content_id):
@@ -77,4 +79,4 @@ def unlike(request, fb_id, content_id):
     print visited_content
     visited_content[fb_id].append(content_id)
     _recommender.save_user_visited_content(visited_content)
-    return HttpResponse(status=200)
+    return HttpResponse(status=200, content=json.dumps(visited_content), content_type="application/json")

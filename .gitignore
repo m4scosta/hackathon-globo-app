@@ -7,3 +7,4 @@ user_content.dat
 *.swp
 *.orig
 .idea
+db.sqlite

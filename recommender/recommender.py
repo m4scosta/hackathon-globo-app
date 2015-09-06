@@ -100,7 +100,7 @@ class Recommender:
             user_pref_vec = preference_vectors[user_id]
 
             content_vector = self.create_content_vector(content_keywords)
-            user_pref_vec = user_pref_vec.add(content_vector) / 2
+            user_pref_vec = np.add(user_pref_vec, content_vector) / 2
             preference_vectors[user_id] = user_pref_vec
 
         self.save_user_visited_content(user_visited_content)
