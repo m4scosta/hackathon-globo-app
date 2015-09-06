@@ -88,8 +88,8 @@ class Recommender:
             user_visited_content[user_id].append(content_id)
 
             user_pref_vec = []
-            # content_vector = self.create_content_vector(content_keywords)
-            content_vector = self.create_content_vector({u'carro velho': 0.1})
+            content_vector = self.create_content_vector(content_keywords)
+            # content_vector = self.create_content_vector({u'carro velho': 0.1})
             user_pref_vec.append(content_vector)
             preference_vectors[user_id] = user_pref_vec
         elif content_id not in user_visited_content[user_id]:
