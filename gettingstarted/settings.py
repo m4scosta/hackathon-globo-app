@@ -118,5 +118,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'hello',
-    'grade_parser'
+    'grade_parser',
+    'recommendations'
 )

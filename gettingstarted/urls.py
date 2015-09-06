@@ -5,6 +5,7 @@ admin.autodiscover()
 
 import hello.views
 import grade_parser.views
+import recommendations.views
 
 urlpatterns = patterns('',
     url(r'^$', hello.views.index, name='index'),
@@ -13,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^fetch_api/$', grade_parser.views.fetch_api, name='fetch_api'),
     url(r'^generate_features_vec/$', grade_parser.views.generate_features_vec, name='generate_features_vec'),
     url(r'^get_features_vec/$', grade_parser.views.get_features_vec, name='get_features_vec'),
+    url(r'^create_user_preferences/(?P<fb_id>\d+)/$', recommendations.views.create_user_preferences, name='create_user_preferences'),
 )
