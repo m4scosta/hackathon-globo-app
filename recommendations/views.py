@@ -4,6 +4,7 @@ import random
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
+from grade_parser.models import Program
 from grade_parser.views import KeywordsNotFoundException
 
 from .models import FBUser, UserKeyword
@@ -45,8 +46,7 @@ def create_user_preferences(request, fb_id):
         keywords, relevancies = parse_keywords_and_relevancies(text)
         keyword_map = {}
         map(lambda (k, r): keyword_map.update({k: r}), zip(keywords, relevancies))
-        Recommender().update_user_preference_vector(fb_id, 100, keyword_map)
-        # save_keywords(user, keywords, relevancies)
+        Recommender().update_user_preference_vector(fb_id, keyword_map)
 
     return HttpResponse(content=json.dumps({"status": "OK"}), content_type="application/json")
 
@@ -54,3 +54,23 @@ def create_user_preferences(request, fb_id):
 def recommend(request, fb_id):
     recommendations = Recommender().recommend(fb_id)
     return HttpResponse(content_type='application/json', content=json.dumps(recommendations))
+
+
+def like(request, fb_id, content_id):
+    Recommender().recommend(fb_id)
+
+    program = Program.objects.get(key=content_id)
+    keyword_map = {}
+    map(lambda (k, r): keyword_map.update({k: r}), program.keyword_set.values_list('text', 'relevancy'))
+    Recommender().update_user_preference_vector(fb_id, keyword_map, content_id=content_id)
+
+    return HttpResponse(status=200)
+
+
+def unlike(request, fb_id, content_id):
+    _recommender = Recommender()
+    visited_content = _recommender.get_user_visited_content()
+    print visited_content
+    visited_content[fb_id].append(content_id)
+    _recommender.save_user_visited_content(visited_content)
+    return HttpResponse(status=200)

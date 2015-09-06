@@ -77,7 +77,7 @@ class Recommender:
         content_vectors[content_id] = content_vector
         self.save_content_vectors(content_vectors)
 
-    def update_user_preference_vector(self, user_id, content_id, content_keywords):
+    def update_user_preference_vector(self, user_id, content_keywords, content_id=None):
         user_visited_content = self.get_user_visited_content()
         preference_vectors = self.get_user_preference_vectors()
 
@@ -85,21 +85,25 @@ class Recommender:
 
         if not has_index:
             user_visited_content[user_id] = []
-            user_visited_content[user_id].append(content_id)
+
+            if content_id is not None:
+                user_visited_content[user_id].append(content_id)
 
             user_pref_vec = []
-            content_vector = self.create_content_vector(content_keywords)
-            # content_vector = self.create_content_vector({u'carro velho': 0.1})
+            # content_vector = self.create_content_vector(content_keywords)
+            content_vector = self.create_content_vector({u'carro velho': 0.1})
             user_pref_vec.append(content_vector)
             preference_vectors[user_id] = user_pref_vec
         elif content_id not in user_visited_content[user_id]:
             user_visited_content[user_id].append(content_id)
+
             user_pref_vec = preference_vectors[user_id]
 
             content_vector = self.create_content_vector(content_keywords)
             user_pref_vec = user_pref_vec.add(content_vector) / 2
             preference_vectors[user_id] = user_pref_vec
 
+        self.save_user_visited_content(user_visited_content)
         self.save_user_preference_vector(preference_vectors)
 
     def recommend(self, user_id):
@@ -109,9 +113,9 @@ class Recommender:
             user_pref_vec = np.array(user_pref_vecs[user_id])
             user_visited_content = self.get_user_visited_content()
             for content_id, content_vec in self.get_content_vectors().iteritems():
-                if ((user_pref_vec.sum() != 0.0) and (content_vec.sum() != 0.0)):
+                if (user_pref_vec.sum() != 0.0) and (content_vec.sum() != 0.0) and str(content_id) not in user_visited_content[user_id]:
                     similarity = user_pref_vec.dot(content_vec) / (norm(user_pref_vec) * norm(content_vec))
-                    print 'sim2: %f'%similarity
+                    print 'sim2: %f' % similarity
                     if similarity > 0.0:
                         recommendations[content_id] = similarity[0]
         return recommendations

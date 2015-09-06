@@ -3,6 +3,7 @@ site
 keywords_vec.dat
 content_vec.dat
 user_pref_vec.dat
+user_content.dat
 *.swp
 *.orig
 .idea
