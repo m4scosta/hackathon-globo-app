@@ -44,9 +44,7 @@ def parse_keywords_and_relevancies(keywords_text):
     return keywords, relevancies
 
 
-def save_keywords(slot, keywords, relevancies):
-    program = Program.objects.create(key=slot["id"])
-
+def save_keywords(program, keywords, relevancies):
     for keyword, relevancy in zip(keywords, relevancies):
         Keyword.objects.create(program=program, text=keyword, relevancy=relevancy)
 
@@ -61,13 +59,20 @@ def fetch_api(request):
     slots = _get_slots_from_globo_api(api_url)
 
     for slot in slots:
+        program, created = Program.objects.get_or_create(key=slot["id_programa"])
+
+        if not created:
+            print "program %d passed" % slot["id_programa"]
+            continue
+
         keywords_text = get_keywords_text_of_slot(slot, post_url)
 
         try:
             keywords, relevancies = parse_keywords_and_relevancies(keywords_text)
             save_keywords(slot, keywords, relevancies)
         except KeywordsNotFoundException as e:
-            print "keywords not found for slot %d" % slot['id']
+            program.delete()
+            print "keywords not found for slot %d" % slot['id_programa']
 
     return HttpResponse(content="OK", content_type="text/plain")
 
