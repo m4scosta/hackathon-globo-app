@@ -8,6 +8,8 @@ class Recommender:
     keywords = None
     content_vectors = None
     user_preference_vectors = None
+    user_visited_content = None
+    USER_CONTENT_DUMP = 'user_content.dat'
     KEYWORDS_DUMP = 'keywords_vec.dat'
     CONTENT_VEC_DUMP = 'content_vec.dat'
     USER_PREF_VEC_DUMP = 'user_pref_vec.dat'
@@ -39,6 +41,14 @@ class Recommender:
                 self.user_preference_vectors = {}
         return self.user_preference_vectors
 
+    def get_user_visited_content(self):
+        if self.user_visited_content is None:
+            try:
+                self.user_visited_content = pickle.load(open(self.USER_CONTENT_DUMP, "rb"))
+            except pickle.PickleError:
+                self.user_visited_content = {}
+        return self.user_visited_content
+
     def save_user_preference_vector(self, user_preference_vectors):
         self.user_preference_vectors = user_preference_vectors
         pickle.dump(self.user_preference_vectors, open(self.USER_PREF_VEC_DUMP, "wb"))
@@ -46,6 +56,10 @@ class Recommender:
     def save_content_vectors(self, content_vectors):
         self.content_vectors = content_vectors
         pickle.dump(self.content_vectors, open(self.CONTENT_VEC_DUMP, "wb"))
+
+    def save_user_visited_content(self, user_visited_content):
+        self.user_visited_content = user_visited_content
+        pickle.dump(self.user_visited_content, open(self.USER_CONTENT_DUMP, "wb"))
 
     def create_content_vector(self, content_keywords):
         keywords = self.get_keywords()
@@ -60,16 +74,21 @@ class Recommender:
         content_vectors[content_id] = content_vector
         self.save_content_vectors(content_vectors)
 
-    def update_user_preference_vector(self, user_id, content_keywords):
-        user_pref_vec = self.get_user_preference_vectors()[user_id]
-        content_vector = self.create_content_vector(content_keywords)
-        user_pref_vec = user_pref_vec.add(content_vector)/2
-        self.get_user_preference_vectors()[user_id] = user_pref_vec
+    def update_user_preference_vector(self, user_id, content_id, content_keywords):
+        user_visited_content = self.get_user_visited_content()
+        if not user_visited_content[user_id].index(content_id):
+            user_visited_content[user_id].append(content_id)
+            user_pref_vec = self.get_user_preference_vectors()[user_id]
+            content_vector = self.create_content_vector(content_keywords)
+            user_pref_vec = user_pref_vec.add(content_vector)/2
+            self.get_user_preference_vectors()[user_id] = user_pref_vec
 
     def recommend(self, user_id):
         recommendations = {}
         user_pref_vec = self.get_user_preference_vectors()[user_id]
+        user_visited_content = self.get_user_visited_content()
         for content_id, content_vec in self.get_content_vectors():
-            similarity = cosine(user_pref_vec, content_vec)
-            recommendations[content_id] = similarity
+            if not user_visited_content[user_id].index(content_id):
+                similarity = cosine(user_pref_vec, content_vec)
+                recommendations[content_id] = similarity
         return recommendations
