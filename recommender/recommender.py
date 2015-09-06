@@ -1,6 +1,8 @@
 import numpy as np
 import pickle
 from scipy.spatial.distance import cosine
+from numpy.linalg import norm
+from scipy.sparse import csr_matrix
 
 
 class Recommender:
@@ -22,14 +24,15 @@ class Recommender:
         if self.keywords is None:
             try:
                 self.keywords = pickle.load(open(self.KEYWORDS_DUMP, "rb"))
-            except pickle.PickleError:
+            except Exception:
                 self.keywords = []
+        return self.keywords
 
     def get_content_vectors(self):
         if self.content_vectors is None:
             try:
                 self.content_vectors = pickle.load(open(self.CONTENT_VEC_DUMP, "rb"))
-            except pickle.PickleError:
+            except Exception:
                 self.content_vectors = {}
         return self.content_vectors
 
@@ -37,7 +40,7 @@ class Recommender:
         if self.user_preference_vectors is None:
             try:
                 self.user_preference_vectors = pickle.load(open(self.USER_PREF_VEC_DUMP, "rb"))
-            except pickle.PickleError:
+            except Exception:
                 self.user_preference_vectors = {}
         return self.user_preference_vectors
 
@@ -45,7 +48,7 @@ class Recommender:
         if self.user_visited_content is None:
             try:
                 self.user_visited_content = pickle.load(open(self.USER_CONTENT_DUMP, "rb"))
-            except pickle.PickleError:
+            except Exception:
                 self.user_visited_content = {}
         return self.user_visited_content
 
@@ -64,8 +67,8 @@ class Recommender:
     def create_content_vector(self, content_keywords):
         keywords = self.get_keywords()
         content_vector = np.zeros(len(keywords))
-        for keyword in keywords:
-            content_vector[keyword] = content_keywords.get(keyword, 0.0)
+        for i, keyword in enumerate(keywords):
+            content_vector[i] = content_keywords.get(keyword, 0.0)
         return content_vector
 
     def add_content_vector(self, content_id, content_keywords):
@@ -76,19 +79,39 @@ class Recommender:
 
     def update_user_preference_vector(self, user_id, content_id, content_keywords):
         user_visited_content = self.get_user_visited_content()
-        if not user_visited_content[user_id].index(content_id):
+        preference_vectors = self.get_user_preference_vectors()
+
+        has_index = user_id in user_visited_content
+
+        if not has_index:
+            user_visited_content[user_id] = []
             user_visited_content[user_id].append(content_id)
-            user_pref_vec = self.get_user_preference_vectors()[user_id]
+
+            user_pref_vec = []
+            # content_vector = self.create_content_vector(content_keywords)
+            content_vector = self.create_content_vector({u'carro velho': 0.1})
+            user_pref_vec.append(content_vector)
+            preference_vectors[user_id] = user_pref_vec
+        elif content_id not in user_visited_content[user_id]:
+            user_visited_content[user_id].append(content_id)
+            user_pref_vec = preference_vectors[user_id]
+
             content_vector = self.create_content_vector(content_keywords)
-            user_pref_vec = user_pref_vec.add(content_vector)/2
-            self.get_user_preference_vectors()[user_id] = user_pref_vec
+            user_pref_vec = user_pref_vec.add(content_vector) / 2
+            preference_vectors[user_id] = user_pref_vec
+
+        self.save_user_preference_vector(preference_vectors)
 
     def recommend(self, user_id):
         recommendations = {}
-        user_pref_vec = self.get_user_preference_vectors()[user_id]
-        user_visited_content = self.get_user_visited_content()
-        for content_id, content_vec in self.get_content_vectors():
-            if not user_visited_content[user_id].index(content_id):
-                similarity = cosine(user_pref_vec, content_vec)
-                recommendations[content_id] = similarity
+        user_pref_vecs = self.get_user_preference_vectors()
+        if user_id in user_pref_vecs:
+            user_pref_vec = np.array(user_pref_vecs[user_id])
+            user_visited_content = self.get_user_visited_content()
+            for content_id, content_vec in self.get_content_vectors().iteritems():
+                if ((user_pref_vec.sum() != 0.0) and (content_vec.sum() != 0.0)):
+                    similarity = user_pref_vec.dot(content_vec) / (norm(user_pref_vec) * norm(content_vec))
+                    print 'sim2: %f'%similarity
+                    if similarity > 0.0:
+                        recommendations[content_id] = similarity[0]
         return recommendations

@@ -69,7 +69,7 @@ def fetch_api(request):
 
         try:
             keywords, relevancies = parse_keywords_and_relevancies(keywords_text)
-            save_keywords(slot, keywords, relevancies)
+            save_keywords(program, keywords, relevancies)
         except KeywordsNotFoundException as e:
             print "keywords not found for slot %d" % slot['id']
 
@@ -79,6 +79,12 @@ def fetch_api(request):
 def set_keywords(request):
     _recommender = Recommender()
     _recommender.set_keywords(Keyword.objects.keyword_array())
+
+    for program in Program.objects.all():
+        keyword_map = {}
+        map(lambda (k, r): keyword_map.update({k: r}), program.keyword_set.values_list('text', 'relevancy'))
+        _recommender.add_content_vector(program.key, keyword_map)
+
     return HttpResponse(content="OK")
 
 

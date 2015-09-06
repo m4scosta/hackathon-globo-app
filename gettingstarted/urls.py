@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     url(r'^set_keywords/$', grade_parser.views.set_keywords, name='set_keywords'),
     url(r'^get_keywords/$', grade_parser.views.get_keywords, name='get_keywords'),
     url(r'^create_user_preferences/(?P<fb_id>\d+)/$', recommendations.views.create_user_preferences, name='create_user_preferences'),
+    url(r'^recommend/(?P<fb_id>\d+)/$', recommendations.views.recommend, name='recommend'),
 )
