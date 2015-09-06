@@ -29,7 +29,7 @@ class Recommender:
                 self.content_vectors = pickle.load(open(self.CONTENT_VEC_DUMP, "rb"))
             except pickle.PickleError:
                 self.content_vectors = {}
-        self.content_vectors
+        return self.content_vectors
 
     def get_user_preference_vectors(self):
         if self.user_preference_vectors is None:
@@ -66,7 +66,7 @@ class Recommender:
         user_pref_vec = user_pref_vec.add(content_vector)/2
         self.get_user_preference_vectors()[user_id] = user_pref_vec
 
-    def recommend_from_vec(self, user_id):
+    def recommend(self, user_id):
         recommendations = {}
         user_pref_vec = self.get_user_preference_vectors()[user_id]
         for content_id, content_vec in self.get_content_vectors():
