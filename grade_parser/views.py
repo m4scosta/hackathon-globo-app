@@ -76,6 +76,32 @@ def fetch_api(request):
     return HttpResponse(content="OK", content_type="text/plain")
 
 
+def _load_api_data():
+    dia = 1
+    while dia <= 31:
+        api_url = "http://redeglobo.globo.com/programacao/grade/2015-09-01/grade.json"
+        post_url = "http://grupo1-nodered.mybluemix.net/keywords/"
+        slots = _get_slots_from_globo_api(api_url)
+
+        for slot in slots:
+            program, created = Program.objects.get_or_create(key=slot["id"])
+
+            if not created:
+                print "program %d passed" % slot["id"]
+                continue
+
+            keywords_text = get_keywords_text_of_slot(slot, post_url)
+
+            try:
+                keywords, relevancies = parse_keywords_and_relevancies(keywords_text)
+                save_keywords(program, keywords, relevancies)
+            except KeywordsNotFoundException as e:
+                print "keywords not found for slot %d" % slot['id']
+
+        dia += 1
+
+
+
 def set_keywords(request):
     _recommender = Recommender()
     _recommender.set_keywords(Keyword.objects.keyword_array())
