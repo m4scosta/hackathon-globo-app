@@ -73,7 +73,8 @@ def fetch_api(request):
 
 
 def generate_features_vec(request):
-    recommender.create_features_vec(Keyword.objects.keyword_array())
+    _recommender = Recommender()
+    _recommender.create_features_vec(Keyword.objects.keyword_array())
     return HttpResponse(content="OK")
 
 
