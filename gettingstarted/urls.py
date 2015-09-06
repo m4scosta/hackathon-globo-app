@@ -11,4 +11,6 @@ urlpatterns = patterns('',
     url(r'^db', hello.views.db, name='db'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^fetch_api/$', grade_parser.views.fetch_api, name='fetch_api'),
+    url(r'^generate_features_vec/$', grade_parser.views.generate_features_vec, name='generate_features_vec'),
+    url(r'^get_features_vec/$', grade_parser.views.get_features_vec, name='get_features_vec'),
 )

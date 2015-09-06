@@ -5,6 +5,8 @@ import json
 from django.http.response import HttpResponse, Http404
 from grade_parser.models import Program, Keyword
 
+from recommender import Recommender
+
 
 class KeywordsNotFoundException(Exception):
     pass
@@ -68,3 +70,14 @@ def fetch_api(request):
             print "keywords not found for slot %d" % slot['id']
 
     return HttpResponse(content="OK", content_type="text/plain")
+
+
+def generate_features_vec(request):
+    recommender.create_features_vec(Keyword.objects.keyword_array())
+    return HttpResponse(content="OK")
+
+
+def get_features_vec(request):
+    _recommender = Recommender()
+    vec = _recommender.get_features_vec_as_list()
+    return HttpResponse(content=str(vec))
