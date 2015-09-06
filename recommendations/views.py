@@ -37,16 +37,20 @@ def save_keywords(user, keywords, relevancies):
 
 @csrf_exempt
 def create_user_preferences(request, fb_id):
-    content = json.loads(request.body)
+    try:
+        content = json.loads(request.body)
 
-    user, created = FBUser.objects.get_or_create(fb_id=fb_id)
+        user, created = FBUser.objects.get_or_create(fb_id=fb_id)
 
-    if content:
-        text = get_keywords_text(u"Apresentadora tambem faz um passeio com o Sacerdote em um carro antigo. Veja fotos!")
-        keywords, relevancies = parse_keywords_and_relevancies(text)
-        keyword_map = {}
-        map(lambda (k, r): keyword_map.update({k: r}), zip(keywords, relevancies))
-        Recommender().update_user_preference_vector(fb_id, keyword_map)
+        if content:
+            text = get_keywords_text(u"Apresentadora tambem faz um passeio com o Sacerdote em um carro antigo. Veja fotos!")
+            keywords, relevancies = parse_keywords_and_relevancies(text)
+            keyword_map = {}
+            map(lambda (k, r): keyword_map.update({k: r}), zip(keywords, relevancies))
+            print keyword_map, content
+            Recommender().update_user_preference_vector(fb_id, keyword_map)
+    except Exception as e:
+        print e
 
     return HttpResponse(content=json.dumps({"status": "OK"}), content_type="application/json")
 

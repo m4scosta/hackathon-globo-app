@@ -107,7 +107,7 @@ class Recommender:
         self.save_user_preference_vector(preference_vectors)
 
     def recommend(self, user_id):
-        recommendations = {}
+        recommendations = {'recommendations': []}
         user_pref_vecs = self.get_user_preference_vectors()
         if user_id in user_pref_vecs:
             user_pref_vec = np.array(user_pref_vecs[user_id])
@@ -117,5 +117,5 @@ class Recommender:
                     similarity = user_pref_vec.dot(content_vec) / (norm(user_pref_vec) * norm(content_vec))
                     print 'sim2: %f' % similarity
                     if similarity > 0.0:
-                        recommendations.update({'globo_id': content_id, 'weight': similarity[0]})
+                        recommendations['recommendations'].append({'globo_id': content_id, 'weight': similarity[0]})
         return recommendations
