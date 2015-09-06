@@ -117,5 +117,5 @@ class Recommender:
                     similarity = user_pref_vec.dot(content_vec) / (norm(user_pref_vec) * norm(content_vec))
                     print 'sim2: %f' % similarity
                     if similarity > 0.0:
-                        recommendations[content_id] = similarity[0]
+                        recommendations.update({'globo_id': content_id, 'weight': similarity[0]})
         return recommendations
