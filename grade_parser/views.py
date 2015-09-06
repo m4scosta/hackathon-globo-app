@@ -72,12 +72,13 @@ def fetch_api(request):
     return HttpResponse(content="OK", content_type="text/plain")
 
 
-def generate_features_vec(request):
-    recommender.create_features_vec(Keyword.objects.keyword_array())
+def set_keywords(request):
+    _recommender = Recommender()
+    _recommender.set_keywords(Keyword.objects.keyword_array())
     return HttpResponse(content="OK")
 
 
-def get_features_vec(request):
+def get_keywords(request):
     _recommender = Recommender()
-    vec = _recommender.get_features_vec_as_list()
+    vec = _recommender.get_keywords()
     return HttpResponse(content=str(vec))
