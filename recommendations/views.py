@@ -39,7 +39,7 @@ def create_user_preferences(request, fb_id):
     user, created = FBUser.objects.get_or_create(fb_id=fb_id)
 
     if created and content:
-        text = get_keywords_text(content['fb_content'])
+        text = get_keywords_text(content['fb_content'].encode('ascii', 'ignore'))
         keywords, relevancies = parse_keywords_and_relevancies(text)
         save_keywords(user, keywords, relevancies)
 
