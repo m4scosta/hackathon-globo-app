@@ -1,3 +1,8 @@
 *.pyc
 site
-features_vec.dat
+keywords_vec.dat
+content_vec.dat
+user_pref_vec.dat
+*.swp
+*.orig
+.idea

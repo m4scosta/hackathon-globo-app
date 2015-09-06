@@ -71,19 +71,18 @@ def fetch_api(request):
             keywords, relevancies = parse_keywords_and_relevancies(keywords_text)
             save_keywords(slot, keywords, relevancies)
         except KeywordsNotFoundException as e:
-            program.delete()
-            print "keywords not found for slot %d" % slot['id_programa']
+            print "keywords not found for slot %d" % slot['id']
 
     return HttpResponse(content="OK", content_type="text/plain")
 
 
-def generate_features_vec(request):
+def set_keywords(request):
     _recommender = Recommender()
-    _recommender.create_features_vec(Keyword.objects.keyword_array())
+    _recommender.set_keywords(Keyword.objects.keyword_array())
     return HttpResponse(content="OK")
 
 
-def get_features_vec(request):
+def get_keywords(request):
     _recommender = Recommender()
-    vec = _recommender.get_features_vec_as_list()
+    vec = _recommender.get_keywords()
     return HttpResponse(content=str(vec))
